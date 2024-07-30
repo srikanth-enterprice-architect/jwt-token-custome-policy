@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+	<http:listener-config name="HTTP_Listener_config"
+		doc:name="HTTP Listener config"
+		doc:id="e388cc11-2d6c-4744-a39e-62173c5a4058">
+		<http:listener-connection host="0.0.0.0"
+			port="8081" />
+	</http:listener-config>
+	<flow name="jwt_1Flow" doc:id="79e121a3-87fb-489c-8a18-9c10185b4394" >
+		<http:listener doc:name="Listener" doc:id="0c7c38fb-475a-4579-85b9-413554d33941" config-ref="HTTP_Listener_config" path="/test"/>
+		<logger level="INFO" doc:name="Logger" doc:id="78a8b1d3-97ab-4e5a-be0b-b47b28333b25" />
+		<java:invoke-static method="validate_jwt_token_jwks()" doc:name="Invoke static" doc:id="11b52852-68c7-4651-bf5e-6946f99f2912" class="org.mazaeur.util.jwt.JWT_Policy_Valifier"/>
+		<ee:transform doc:name="Transform Message" doc:id="e790f87b-7ec0-49ad-a97f-953cb969213b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import java!org::mazaeur::util::jwt::JWT_Policy_Valifier
+output application/json
+---
+{
+	result: JWT_Policy_Valifier::validate_jwt_token_jwks()
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="6f74ddc8-f35a-4b0c-902b-16dabddf38a2" />
+	</flow>
+</mule>
